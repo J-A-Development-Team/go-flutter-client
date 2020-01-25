@@ -5,12 +5,11 @@ import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
-import 'game_communication_helper.dart';
 
 class GameScreen extends StatefulWidget {
   final int boardSize;
-
-  GameScreen({this.boardSize});
+final HtmlWebSocketChannel channel;
+  GameScreen({this.boardSize,this.channel});
 
   @override
   _GameScreenState createState() => _GameScreenState();
@@ -45,8 +44,9 @@ class _GameScreenState extends State<GameScreen> {
       Intersection intersection = new Intersection.withStone(x, y, true, playerColor);
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
-      game.send(message);
+      widget.channel.sink.add(message);
     }
+
     setState(() {
       boardState[x][y].hasStone = true;
       boardState[x][y].isStoneBlack = whitesTurn;
@@ -110,8 +110,9 @@ class _GameScreenState extends State<GameScreen> {
       defaultColumnWidth: FixedColumnWidth(media / (widget.boardSize + 1)),
     );
   }
-  _onGameDataReceived(message) {
+  _onGameDataReceived(servermessage) {
     DataPackage data;
+    Map message = json.decode(servermessage);
     data = new DataPackage.fromJson(message);
     print("TO jest info: $data.info");
     switch (data.info) {
@@ -163,7 +164,8 @@ class _GameScreenState extends State<GameScreen> {
   }
   @override
   void initState() {
-    game.addListener(_onGameDataReceived);
+    widget.channel.stream.listen(_onGameDataReceived);
+
     super.initState();
   }
 

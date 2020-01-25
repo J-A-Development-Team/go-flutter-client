@@ -8,7 +8,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import 'Common/data_package.dart';
 import 'Common/game_config.dart';
-import 'game_communication_helper.dart';
 import 'game_screen.dart';
 
 class ConfigurationScreen extends StatefulWidget {
@@ -22,7 +21,7 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
   bool wantsToPlayWithBot = false;
   String filePath = 'files/htpg.htm';
   String selectedSize = "5x5";
-
+  var channel = HtmlWebSocketChannel.connect("ws://localhost:8888");
 
   void sendGameConfig() {
     int boardSize;
@@ -51,7 +50,7 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
     GameConfig gameConfig = new GameConfig(wantsToPlayWithBot, boardSize, false);
     DataPackage dataPackage = new DataPackage(gameConfig, Info.GameConfig);
     String gameConfigDataAsJson = jsonEncode(dataPackage);
-    game.send(gameConfigDataAsJson);
+    channel.sink.add(gameConfigDataAsJson);
     print(gameConfigDataAsJson);
   }
 
@@ -101,6 +100,7 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                           new MaterialPageRoute(
                               builder: (context) => GameScreen(
                                     boardSize: 9,
+                                channel: channel
                                   )))
                     },
                   ),
