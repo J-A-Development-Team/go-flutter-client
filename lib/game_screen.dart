@@ -5,7 +5,7 @@ import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
-import 'dart:convert';
+
 
 class GameScreen extends StatefulWidget {
   final int boardSize;
@@ -14,10 +14,11 @@ class GameScreen extends StatefulWidget {
   GameScreen({this.boardSize, this.channel});
 
   @override
-  _GameScreenState createState() => _GameScreenState();
+  GameScreenState createState() => GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+
+class GameScreenState extends State<GameScreen> {
   bool isYourTurn = false;
   bool playerColor = false;
   String turn = "";
@@ -37,23 +38,23 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  void processMessage(Map<String, dynamic> message) {}
+
 
   void cellClicked(int x, int y) {
-    Intersection intersection =
-        new Intersection.withStone(x, y, true, playerColor);
-    DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
-    String message = jsonEncode(dataPackage);
-    widget.channel.sink.add(message);
-    print("$x $y");
+      Intersection intersection = new Intersection.withStone(
+          x, y, true, playerColor);
+      DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
+      String message = jsonEncode(dataPackage);
+      widget.channel.sink.add(message);
+      print("$x $y");
+
   }
 
   void updateTable(DataPackage dataPackage) {
     print(dataPackage.data);
-    for (int i = 0; widget.boardSize > i; i++) {
-      for (int j = 0; widget.boardSize > j; j++) {
-        boardState[j][i] =
-            Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+    for(int i=0;widget.boardSize>i;i++){
+      for(int j=0;widget.boardSize>j;j++){
+        boardState[j][i] = Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
       }
     }
   }
@@ -128,10 +129,10 @@ class _GameScreenState extends State<GameScreen> {
         }
         break;
       case Info.InfoMessage:
-        _showDialog("Warning", jsonDecode(data.data) as String);
+        // TODO: Handle this case.
         break;
       case Info.Pass:
-        _showDialog("Info", jsonDecode(data.data) as String);
+        // TODO: Handle this case.
         break;
       case Info.Turn:
         print("Got Turn Info");
@@ -151,35 +152,15 @@ class _GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-        // TODO: Handle this case.
-        break;
-      case Info.GameResult:
-        _showDialog("Game End", jsonDecode(data.data) as String);
+      // TODO: Handle this case.
         break;
       case Info.GameConfig:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
+        break;
+      case Info.GameResult:
+      // TODO: Handle this case.
         break;
     }
-  }
-
-  void _showDialog(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text(title),
-          content: new Text(content),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void sendPass() {
