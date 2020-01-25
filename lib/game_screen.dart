@@ -1,11 +1,11 @@
 import 'dart:convert';
 
+import 'package:dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
-
 
 class GameScreen extends StatefulWidget {
   final int boardSize;
@@ -16,7 +16,6 @@ class GameScreen extends StatefulWidget {
   @override
   GameScreenState createState() => GameScreenState();
 }
-
 
 class GameScreenState extends State<GameScreen> {
   bool isYourTurn = false;
@@ -38,27 +37,29 @@ class GameScreenState extends State<GameScreen> {
     }
   }
 
-
-
   void cellClicked(int x, int y) {
-      Intersection intersection = new Intersection.withStone(
-          x, y, true, playerColor);
+    if(isYourTurn) {
+      Intersection intersection =
+      new Intersection.withStone(x, y, true, playerColor);
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
       print("$x $y");
-
+    }
   }
 
   void updateTable(DataPackage dataPackage) {
     print(dataPackage.data);
-    for(int i=0;widget.boardSize>i;i++){
-      for(int j=0;widget.boardSize>j;j++){
-        boardState[j][i] = Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+    for (int i = 0; widget.boardSize > i; i++) {
+      for (int j = 0; widget.boardSize > j; j++) {
+        boardState[j][i] =
+            Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
       }
     }
   }
-
+  void showInfoDialog(String info){
+    alert(info);
+  }
   Widget getRowItem(int x, int y) {
     return GestureDetector(
       onTap: () {
@@ -76,7 +77,8 @@ class GameScreenState extends State<GameScreen> {
         child: CustomPaint(
           size: Size(
               media / (widget.boardSize + 1), media / (widget.boardSize + 1)),
-          painter: CellPainter(boardState[x][y]),
+          painter: CellPainter(
+              intersection: boardState[x][y], boardSize: widget.boardSize),
         ),
       ),
     );
@@ -129,7 +131,7 @@ class GameScreenState extends State<GameScreen> {
         }
         break;
       case Info.InfoMessage:
-        // TODO: Handle this case.
+        showInfoDialog(data.data);
         break;
       case Info.Pass:
         // TODO: Handle this case.
@@ -152,13 +154,13 @@ class GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.GameConfig:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.GameResult:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
     }
   }
@@ -181,14 +183,24 @@ class GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     media = MediaQuery.of(context).size.height;
+    if (MediaQuery.of(context).size.width < media) {
+      media = MediaQuery.of(context).size.width;
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: <Widget>[
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Prisoners: $points"),
-                Text(turn),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("Prisoners: $points"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(turn),
+                ),
                 OutlineButton(
                   child: Text("Pass"),
                   onPressed: () {
@@ -211,9 +223,10 @@ class GameScreenState extends State<GameScreen> {
 }
 
 class CellPainter extends CustomPainter {
-  Intersection intersection;
+  final Intersection intersection;
+  final int boardSize;
 
-  CellPainter(this.intersection);
+  CellPainter({this.intersection, this.boardSize});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -221,10 +234,32 @@ class CellPainter extends CustomPainter {
       ..color = Colors.black
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-        Offset(size.width / 2, 0), Offset(size.width / 2, size.height), paint);
-    canvas.drawLine(
-        Offset(0, size.height / 2), Offset(size.width, size.height / 2), paint);
+    Offset left;
+    Offset right;
+    Offset top;
+    Offset bottom;
+    if (intersection.xCoordinate == 0) {
+      left = new Offset(size.width / 2, size.height / 2);
+    } else {
+      left = new Offset(0, size.height / 2);
+    }
+    if (intersection.yCoordinate == 0) {
+      top = new Offset(size.width / 2, size.height / 2);
+    } else {
+      top = new Offset(size.width / 2, 0);
+    }
+    if (intersection.xCoordinate == boardSize - 1) {
+      right = new Offset(size.width / 2, size.height / 2);
+    } else {
+      right = new Offset(size.width, size.height / 2);
+    }
+    if (intersection.yCoordinate == boardSize - 1) {
+      bottom = new Offset(size.width / 2, size.height / 2);
+    } else {
+      bottom = new Offset(size.width / 2, size.height);
+    }
+    canvas.drawLine(top, bottom, paint);
+    canvas.drawLine(left, right, paint);
     if (!intersection.isStoneBlack) {
       paint.color = Colors.white;
     }
@@ -233,7 +268,7 @@ class CellPainter extends CustomPainter {
     }
     if (intersection.hasStone) {
       canvas.drawCircle(
-          Offset(size.width / 2, size.height / 2), size.height / 2, paint);
+          Offset(size.width / 2, size.height / 2), (size.height / 2)-(size.height*0.01), paint);
     }
   }
 
