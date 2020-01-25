@@ -141,7 +141,7 @@ class _GameScreenState extends State<GameScreen> {
         setState(() {
           turn = data.data;
         });
-        if (turn == "Your turn") {
+        if (turn == "Your turn" || turn == "Remove Dead Stones") {
           isYourTurn = true;
         }else{
           isYourTurn = false;
@@ -228,6 +228,9 @@ class CellPainter extends CustomPainter {
         Offset(0, size.height / 2), Offset(size.width, size.height / 2), paint);
     if (!intersection.isStoneBlack) {
       paint.color = Colors.white;
+    }
+    if(intersection.isStoneDead){
+      paint.color = paint.color.withAlpha(128);
     }
     if (intersection.hasStone) {
       canvas.drawCircle(
