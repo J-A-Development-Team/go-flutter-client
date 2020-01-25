@@ -5,6 +5,8 @@ import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
+import 'dart:convert';
+
 
 class GameScreen extends StatefulWidget {
   final int boardSize;
@@ -40,26 +42,22 @@ class _GameScreenState extends State<GameScreen> {
 
 
   void cellClicked(int x, int y) {
-    if(boardState[x][y].hasStone==false && isYourTurn) {
       Intersection intersection = new Intersection.withStone(
           x, y, true, playerColor);
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
-
-
-      setState(() {
-        boardState[x][y].hasStone = true;
-        boardState[x][y].isStoneBlack = playerColor;
-      });
       print("$x $y");
-    }
+
   }
 
   void updateTable(DataPackage dataPackage) {
-
-    boardState =  jsonDecode(dataPackage.data);
-
+    print(dataPackage.data);
+    for(int i=0;widget.boardSize>i;i++){
+      for(int j=0;widget.boardSize>j;j++){
+        boardState[j][i] = Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+      }
+    }
   }
 
   Widget getRowItem(int x, int y) {
@@ -111,7 +109,7 @@ class _GameScreenState extends State<GameScreen> {
     DataPackage data;
     Map message = json.decode(servermessage);
     data = new DataPackage.fromJson(message);
-    print("TO jest info: $data.info");
+    print("TO jest info: ${data.info}");
     switch (data.info) {
       case Info.Stone:
       // TODO: Handle this case.
