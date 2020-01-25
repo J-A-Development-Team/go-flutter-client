@@ -5,23 +5,24 @@ import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
-import 'dart:convert';
 
 
 class GameScreen extends StatefulWidget {
   final int boardSize;
-final HtmlWebSocketChannel channel;
-  GameScreen({this.boardSize,this.channel});
+  final HtmlWebSocketChannel channel;
+
+  GameScreen({this.boardSize, this.channel});
 
   @override
-  _GameScreenState createState() => _GameScreenState();
+  GameScreenState createState() => GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+
+class GameScreenState extends State<GameScreen> {
   bool isYourTurn = false;
   bool playerColor = false;
   String turn = "";
-  int points= 0;
+  int points = 0;
   List<List<Intersection>> boardState = List.generate(
     19,
     (i) => List<Intersection>.generate(
@@ -36,9 +37,7 @@ class _GameScreenState extends State<GameScreen> {
       }
     }
   }
-  void processMessage (Map<String,dynamic> message){
 
-  }
 
 
   void cellClicked(int x, int y) {
@@ -105,6 +104,7 @@ class _GameScreenState extends State<GameScreen> {
       defaultColumnWidth: FixedColumnWidth(media / (widget.boardSize + 1)),
     );
   }
+
   _onGameDataReceived(servermessage) {
     DataPackage data;
     Map message = json.decode(servermessage);
@@ -112,7 +112,7 @@ class _GameScreenState extends State<GameScreen> {
     print("TO jest info: ${data.info}");
     switch (data.info) {
       case Info.Stone:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.StoneTable:
         print("Got Table Info");
@@ -124,15 +124,15 @@ class _GameScreenState extends State<GameScreen> {
       case Info.PlayerColor:
         print("Got Player COlor Info");
 
-        if(data.data=="black"){
-          playerColor=true;
+        if (data.data == "black") {
+          playerColor = true;
         }
         break;
       case Info.InfoMessage:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.Pass:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.Turn:
         print("Got Turn Info");
@@ -141,7 +141,7 @@ class _GameScreenState extends State<GameScreen> {
         });
         if (turn == "Your turn" || turn == "Remove Dead Stones") {
           isYourTurn = true;
-        }else{
+        } else {
           isYourTurn = false;
           print(turn);
         }
@@ -162,14 +162,15 @@ class _GameScreenState extends State<GameScreen> {
         break;
     }
   }
-  void sendPass(){
-    if(isYourTurn){
+
+  void sendPass() {
+    if (isYourTurn) {
       DataPackage dataPackage = new DataPackage(0, Info.Pass);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
-
     }
   }
+
   @override
   void initState() {
     widget.channel.stream.listen(_onGameDataReceived);
@@ -227,7 +228,7 @@ class CellPainter extends CustomPainter {
     if (!intersection.isStoneBlack) {
       paint.color = Colors.white;
     }
-    if(intersection.isStoneDead){
+    if (intersection.isStoneDead) {
       paint.color = paint.color.withAlpha(128);
     }
     if (intersection.hasStone) {
