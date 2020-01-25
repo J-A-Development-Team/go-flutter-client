@@ -7,11 +7,11 @@ import 'Common/data_package.dart';
 import 'Common/intersection.dart';
 import 'dart:convert';
 
-
 class GameScreen extends StatefulWidget {
   final int boardSize;
-final HtmlWebSocketChannel channel;
-  GameScreen({this.boardSize,this.channel});
+  final HtmlWebSocketChannel channel;
+
+  GameScreen({this.boardSize, this.channel});
 
   @override
   _GameScreenState createState() => _GameScreenState();
@@ -21,7 +21,7 @@ class _GameScreenState extends State<GameScreen> {
   bool isYourTurn = false;
   bool playerColor = false;
   String turn = "";
-  int points= 0;
+  int points = 0;
   List<List<Intersection>> boardState = List.generate(
     19,
     (i) => List<Intersection>.generate(
@@ -36,26 +36,24 @@ class _GameScreenState extends State<GameScreen> {
       }
     }
   }
-  void processMessage (Map<String,dynamic> message){
 
-  }
-
+  void processMessage(Map<String, dynamic> message) {}
 
   void cellClicked(int x, int y) {
-      Intersection intersection = new Intersection.withStone(
-          x, y, true, playerColor);
-      DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
-      String message = jsonEncode(dataPackage);
-      widget.channel.sink.add(message);
-      print("$x $y");
-
+    Intersection intersection =
+        new Intersection.withStone(x, y, true, playerColor);
+    DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
+    String message = jsonEncode(dataPackage);
+    widget.channel.sink.add(message);
+    print("$x $y");
   }
 
   void updateTable(DataPackage dataPackage) {
     print(dataPackage.data);
-    for(int i=0;widget.boardSize>i;i++){
-      for(int j=0;widget.boardSize>j;j++){
-        boardState[j][i] = Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+    for (int i = 0; widget.boardSize > i; i++) {
+      for (int j = 0; widget.boardSize > j; j++) {
+        boardState[j][i] =
+            Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
       }
     }
   }
@@ -105,6 +103,7 @@ class _GameScreenState extends State<GameScreen> {
       defaultColumnWidth: FixedColumnWidth(media / (widget.boardSize + 1)),
     );
   }
+
   _onGameDataReceived(servermessage) {
     DataPackage data;
     Map message = json.decode(servermessage);
@@ -112,7 +111,7 @@ class _GameScreenState extends State<GameScreen> {
     print("TO jest info: ${data.info}");
     switch (data.info) {
       case Info.Stone:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.StoneTable:
         print("Got Table Info");
@@ -124,15 +123,15 @@ class _GameScreenState extends State<GameScreen> {
       case Info.PlayerColor:
         print("Got Player COlor Info");
 
-        if(data.data=="black"){
-          playerColor=true;
+        if (data.data == "black") {
+          playerColor = true;
         }
         break;
       case Info.InfoMessage:
-      // TODO: Handle this case.
+        _showDialog("Warning", jsonDecode(data.data) as String);
         break;
       case Info.Pass:
-      // TODO: Handle this case.
+        _showDialog("Info", jsonDecode(data.data) as String);
         break;
       case Info.Turn:
         print("Got Turn Info");
@@ -141,7 +140,7 @@ class _GameScreenState extends State<GameScreen> {
         });
         if (turn == "Your turn" || turn == "Remove Dead Stones") {
           isYourTurn = true;
-        }else{
+        } else {
           isYourTurn = false;
           print(turn);
         }
@@ -152,24 +151,45 @@ class _GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-      // TODO: Handle this case.
-        break;
-      case Info.GameConfig:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
         break;
       case Info.GameResult:
-      // TODO: Handle this case.
+        _showDialog("Game End", jsonDecode(data.data) as String);
+        break;
+      case Info.GameConfig:
+        // TODO: Handle this case.
         break;
     }
   }
-  void sendPass(){
-    if(isYourTurn){
+
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(content),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void sendPass() {
+    if (isYourTurn) {
       DataPackage dataPackage = new DataPackage(0, Info.Pass);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
-
     }
   }
+
   @override
   void initState() {
     widget.channel.stream.listen(_onGameDataReceived);
@@ -227,7 +247,7 @@ class CellPainter extends CustomPainter {
     if (!intersection.isStoneBlack) {
       paint.color = Colors.white;
     }
-    if(intersection.isStoneDead){
+    if (intersection.isStoneDead) {
       paint.color = paint.color.withAlpha(128);
     }
     if (intersection.hasStone) {
