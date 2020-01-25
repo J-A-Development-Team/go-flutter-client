@@ -16,10 +16,10 @@ final HtmlWebSocketChannel channel;
 }
 
 class _GameScreenState extends State<GameScreen> {
-  bool whitesTurn = false;
   bool isYourTurn = false;
   bool playerColor = false;
   String turn = "";
+  int points= 0;
   List<List<Intersection>> boardState = List.generate(
     19,
     (i) => List<Intersection>.generate(
@@ -40,23 +40,20 @@ class _GameScreenState extends State<GameScreen> {
 
 
   void cellClicked(int x, int y) {
-    if(boardState[x][y].hasStone==false){
-      Intersection intersection = new Intersection.withStone(x, y, true, playerColor);
+    if(boardState[x][y].hasStone==false && isYourTurn) {
+      Intersection intersection = new Intersection.withStone(
+          x, y, true, playerColor);
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
-    }
 
-    setState(() {
-      boardState[x][y].hasStone = true;
-      boardState[x][y].isStoneBlack = whitesTurn;
-    });
-    if (whitesTurn) {
-      whitesTurn = false;
-    } else {
-      whitesTurn = true;
+
+      setState(() {
+        boardState[x][y].hasStone = true;
+        boardState[x][y].isStoneBlack = playerColor;
+      });
+      print("$x $y");
     }
-    print("$x $y");
   }
 
   void updateTable(DataPackage dataPackage) {
@@ -146,10 +143,15 @@ class _GameScreenState extends State<GameScreen> {
         });
         if (turn == "Your turn") {
           isYourTurn = true;
+        }else{
+          isYourTurn = false;
+          print(turn);
         }
         break;
       case Info.Points:
-      // TODO: Handle this case.
+        setState(() {
+          points = data.data;
+        });
         break;
       case Info.TerritoryTable:
       // TODO: Handle this case.
@@ -160,6 +162,14 @@ class _GameScreenState extends State<GameScreen> {
       case Info.GameResult:
       // TODO: Handle this case.
         break;
+    }
+  }
+  void sendPass(){
+    if(isYourTurn){
+      DataPackage dataPackage = new DataPackage(0, Info.Pass);
+      String message = jsonEncode(dataPackage);
+      widget.channel.sink.add(message);
+
     }
   }
   @override
@@ -178,11 +188,12 @@ class _GameScreenState extends State<GameScreen> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Text("Prisoners: "),
+                Text("Prisoners: $points"),
                 Text(turn),
                 OutlineButton(
                   child: Text("Pass"),
                   onPressed: () {
+                    sendPass();
                     print("pass");
                   },
                 )
