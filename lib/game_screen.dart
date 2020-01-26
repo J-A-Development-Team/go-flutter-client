@@ -74,16 +74,16 @@ class GameScreenState extends State<GameScreen> {
       },
       child: Container(
         constraints: new BoxConstraints(
-          minHeight: media / (widget.boardSize + 1),
-          minWidth: media / (widget.boardSize + 1),
-          maxHeight: media / (widget.boardSize + 1),
-          maxWidth: media / (widget.boardSize + 1),
+          minHeight: media / (widget.boardSize + 2),
+          minWidth: media / (widget.boardSize + 2),
+          maxHeight: media / (widget.boardSize + 2),
+          maxWidth: media / (widget.boardSize + 2),
         ),
         color: Color.fromRGBO(224, 172, 105, 100),
         //color: Colors.red,
         child: CustomPaint(
           size: Size(
-              media / (widget.boardSize + 1), media / (widget.boardSize + 1)),
+              media / (widget.boardSize + 2), media / (widget.boardSize + 2)),
           painter: CellPainter(
               intersection: boardState[x][y],
               boardSize: widget.boardSize,
@@ -112,7 +112,7 @@ class GameScreenState extends State<GameScreen> {
   Table generateGameBoard(int size) {
     return Table(
       children: getTableRowList(size),
-      defaultColumnWidth: FixedColumnWidth(media / (widget.boardSize + 1)),
+      defaultColumnWidth: FixedColumnWidth(media / (widget.boardSize + 2)),
     );
   }
 
