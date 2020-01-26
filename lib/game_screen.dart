@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go_flutter/Common/territory_states.dart';
 import 'package:web_socket_channel/html.dart';
-
 import 'Common/data_package.dart';
 import 'Common/intersection.dart';
 
@@ -50,19 +49,16 @@ class GameScreenState extends State<GameScreen> {
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
-      print("$x $y");
     }
   }
 
   void updateTable(DataPackage dataPackage) {
-    print(dataPackage.data);
     for (int i = 0; widget.boardSize > i; i++) {
       for (int j = 0; widget.boardSize > j; j++) {
         setState(() {
           boardState[j][i] =
               Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
         });
-
       }
     }
   }
@@ -89,7 +85,9 @@ class GameScreenState extends State<GameScreen> {
           size: Size(
               media / (widget.boardSize + 1), media / (widget.boardSize + 1)),
           painter: CellPainter(
-              intersection: boardState[x][y], boardSize: widget.boardSize,territoryState: territoryStates[x][y]),
+              intersection: boardState[x][y],
+              boardSize: widget.boardSize,
+              territoryState: territoryStates[x][y]),
         ),
       ),
     );
@@ -122,21 +120,14 @@ class GameScreenState extends State<GameScreen> {
     DataPackage data;
     Map message = json.decode(serverMessage);
     data = new DataPackage.fromJson(message);
-    print("TO jest info: ${data.info}");
     switch (data.info) {
       case Info.Stone:
         // TODO: Handle this case.
         break;
       case Info.StoneTable:
-        print("Got Table Info");
-
-        {
-          updateTable(data);
-        }
+        updateTable(data);
         break;
       case Info.PlayerColor:
-        print("Got Player COlor Info");
-
         if (data.data == "black") {
           playerColor = true;
         }
@@ -148,7 +139,6 @@ class GameScreenState extends State<GameScreen> {
         showInfoDialog(data.data);
         break;
       case Info.Turn:
-        print("Got Turn Info");
         setState(() {
           turn = data.data;
         });
@@ -165,7 +155,6 @@ class GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-        print(data.data);
         updateTerritory(data);
         break;
       case Info.GameConfig:
@@ -177,6 +166,7 @@ class GameScreenState extends State<GameScreen> {
         break;
     }
   }
+
   void updateTerritory(DataPackage dataPackage) {
     for (int i = 0; widget.boardSize > i; i++) {
       for (int j = 0; widget.boardSize > j; j++) {
@@ -184,7 +174,6 @@ class GameScreenState extends State<GameScreen> {
           territoryStates[i][j] =
               decodeTerritory(territoryMap, jsonDecode(dataPackage.data)[i][j]);
         });
-        print(territoryStates[i][j]);
       }
     }
   }
@@ -229,7 +218,6 @@ class GameScreenState extends State<GameScreen> {
                   child: Text("Pass"),
                   onPressed: () {
                     sendPass();
-                    print("pass");
                   },
                 )
               ],
@@ -250,7 +238,8 @@ class CellPainter extends CustomPainter {
   final Intersection intersection;
   final int boardSize;
   final TerritoryStates territoryState;
-  CellPainter({this.intersection, this.boardSize,this.territoryState});
+
+  CellPainter({this.intersection, this.boardSize, this.territoryState});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -294,16 +283,23 @@ class CellPainter extends CustomPainter {
       canvas.drawCircle(Offset(size.width / 2, size.height / 2),
           (size.height / 2) - (size.height * 0.01), paint);
     }
-    if(territoryState == TerritoryStates.BlackTerritory){
-      print("Czarne");
+    if (territoryState == TerritoryStates.BlackTerritory) {
       paint.color = Colors.black;
-      canvas.drawRect(Rect.fromCenter(center: Offset(size.width / 2, size.height / 2), width: size.width/2,height: size.height/2), paint);
-    }else if(territoryState == TerritoryStates.WhiteTerritory){
-      print("Białe");
+      canvas.drawRect(
+          Rect.fromCenter(
+              center: Offset(size.width / 2, size.height / 2),
+              width: size.width / 2,
+              height: size.height / 2),
+          paint);
+    } else if (territoryState == TerritoryStates.WhiteTerritory) {
       paint.color = Colors.white;
-      canvas.drawRect(Rect.fromCenter(center: Offset(size.width / 2, size.height / 2), width: size.width/2,height: size.height/2), paint);
+      canvas.drawRect(
+          Rect.fromCenter(
+              center: Offset(size.width / 2, size.height / 2),
+              width: size.width / 2,
+              height: size.height / 2),
+          paint);
     }
-
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:go_flutter/customValueChooser.dart';
 import 'package:web_socket_channel/html.dart';
 import 'Common/data_package.dart';
 import 'Common/game_config.dart';
@@ -14,14 +15,13 @@ class ConfigurationScreen extends StatefulWidget {
 }
 
 class _ConfigurationScreenState extends State<ConfigurationScreen> {
-  bool wantsToPlayWithBot = false;
   int boardSize = 0;
-
+  List<String> values = ["5x5", "9x9", "13x13", "19x19"];
   String filePath = 'files/htpg.htm';
   String selectedSize = "5x5";
   var channel = HtmlWebSocketChannel.connect("ws://localhost:8888");
 
-  void sendGameConfig() {
+  void sendGameConfig(bool gameWithBot) {
     switch (selectedSize) {
       case "5x5":
         {
@@ -44,72 +44,64 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
           break;
         }
     }
-    GameConfig gameConfig = new GameConfig(wantsToPlayWithBot, boardSize, false);
+    GameConfig gameConfig = new GameConfig(gameWithBot, boardSize, false);
     DataPackage dataPackage = new DataPackage(gameConfig, Info.GameConfig);
     String gameConfigDataAsJson = jsonEncode(dataPackage);
     channel.sink.add(gameConfigDataAsJson);
-    print(gameConfigDataAsJson);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  DropdownButton(
-                    items: <DropdownMenuItem>[
-                      new DropdownMenuItem(child: Text("5x5"),  value: "5x5"  ),
-                      new DropdownMenuItem(child: Text("9x9"),  value: "9x9"  ),
-                      new DropdownMenuItem(child: Text("13x13"),value: "13x13"),
-                      new DropdownMenuItem(child: Text("19x19"),value: "19x19"),
-                    ],
-                    value: selectedSize,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedSize = value;
-
-                      });
-                      print(value);
-                    },
-                  ),
-                  Text("Play with bot"),
-                  Checkbox(
-                      value: wantsToPlayWithBot,
-                      onChanged: (bool value) {
-                        setState(() {
-                          wantsToPlayWithBot = value;
-                        });
-                      }),
-                  OutlineButton(
-                    child: Text("Start Game"),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomValueChooser(
+                  values: values,
+                  onSelectedParam: (String param) => {selectedSize = param},
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
+                  child: RaisedButton(
+                    child: Text("Play With Human"),
                     onPressed: () => {
-                      print("lets play"),
-                      sendGameConfig(),
+                      sendGameConfig(false),
                       Navigator.push(
                           context,
                           new MaterialPageRoute(
                               builder: (context) => GameScreen(
-                                    boardSize: boardSize,
-                                channel: channel
-                                  )))
+                                  boardSize: boardSize, channel: channel)))
                     },
                   ),
-                ],
+                ),
               ),
-            ),
-            Expanded(
-              flex: 9,
-              child: Container(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
+                  child: RaisedButton(
+                    child: Text("Play With Bot"),
+                    onPressed: () => {
+                      sendGameConfig(true),
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                              builder: (context) => GameScreen(
+                                  boardSize: boardSize, channel: channel)))
+                    },
+                  ),
+                ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );

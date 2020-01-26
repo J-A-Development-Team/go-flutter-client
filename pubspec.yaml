@@ -27,6 +27,7 @@ dependencies:
   webview_flutter: ^0.3.19+5
   json_annotation: ^3.0.1
   dialog: ^0.7.2+1
+  carousel_slider: ^1.4.1
 
 dev_dependencies:
   build_runner: ^1.7.3
