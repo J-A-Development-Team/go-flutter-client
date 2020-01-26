@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dialog/dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:go_flutter/Common/territory_states.dart';
 import 'package:web_socket_channel/html.dart';
 
 import 'Common/data_package.dart';
@@ -27,6 +29,10 @@ class GameScreenState extends State<GameScreen> {
     (i) => List<Intersection>.generate(
         19, (j) => new Intersection.withStone(i, j, false, false)),
   );
+  List<List<TerritoryStates>> territoryStates = List.generate(
+    19,
+    (i) => List<TerritoryStates>.generate(19, (j) => TerritoryStates.Unknown),
+  );
   var media;
 
   void generateBoardState() {
@@ -38,9 +44,9 @@ class GameScreenState extends State<GameScreen> {
   }
 
   void cellClicked(int x, int y) {
-    if(isYourTurn) {
+    if (isYourTurn) {
       Intersection intersection =
-      new Intersection.withStone(x, y, true, playerColor);
+          new Intersection.withStone(x, y, true, playerColor);
       DataPackage dataPackage = new DataPackage(intersection, Info.Stone);
       String message = jsonEncode(dataPackage);
       widget.channel.sink.add(message);
@@ -52,14 +58,19 @@ class GameScreenState extends State<GameScreen> {
     print(dataPackage.data);
     for (int i = 0; widget.boardSize > i; i++) {
       for (int j = 0; widget.boardSize > j; j++) {
-        boardState[j][i] =
-            Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+        setState(() {
+          boardState[j][i] =
+              Intersection.fromJson(jsonDecode(dataPackage.data)[j][i]);
+        });
+
       }
     }
   }
-  void showInfoDialog(String info){
+
+  void showInfoDialog(String info) {
     alert(info);
   }
+
   Widget getRowItem(int x, int y) {
     return GestureDetector(
       onTap: () {
@@ -107,9 +118,9 @@ class GameScreenState extends State<GameScreen> {
     );
   }
 
-  _onGameDataReceived(servermessage) {
+  _onGameDataReceived(serverMessage) {
     DataPackage data;
-    Map message = json.decode(servermessage);
+    Map message = json.decode(serverMessage);
     data = new DataPackage.fromJson(message);
     print("TO jest info: ${data.info}");
     switch (data.info) {
@@ -154,14 +165,26 @@ class GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-        // TODO: Handle this case.
+        updateTerritory(data.data);
         break;
       case Info.GameConfig:
         // TODO: Handle this case.
         break;
       case Info.GameResult:
         showInfoDialog(data.data);
+
         break;
+    }
+  }
+  void updateTerritory(DataPackage dataPackage) {
+    print(dataPackage.data);
+    for (int i = 0; widget.boardSize > i; i++) {
+      for (int j = 0; widget.boardSize > j; j++) {
+        setState(() {
+          territoryStates[j][i] =
+              decodeTerritory(territoryMap, jsonDecode(dataPackage.data)[i][j]);
+        });
+      }
     }
   }
 
@@ -225,8 +248,8 @@ class GameScreenState extends State<GameScreen> {
 class CellPainter extends CustomPainter {
   final Intersection intersection;
   final int boardSize;
-
-  CellPainter({this.intersection, this.boardSize});
+  final TerritoryStates territoryState;
+  CellPainter({this.intersection, this.boardSize,this.territoryState});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -267,9 +290,19 @@ class CellPainter extends CustomPainter {
       paint.color = paint.color.withAlpha(128);
     }
     if (intersection.hasStone) {
-      canvas.drawCircle(
-          Offset(size.width / 2, size.height / 2), (size.height / 2)-(size.height*0.01), paint);
+      canvas.drawCircle(Offset(size.width / 2, size.height / 2),
+          (size.height / 2) - (size.height * 0.01), paint);
     }
+    if(territoryState == TerritoryStates.BlackTerritory){
+      print("Czarne");
+      paint.color = Colors.black;
+      canvas.drawRect(Rect.fromCenter(center: Offset(size.width / 2, size.height / 2), width: size.width/2,height: size.height/2), paint);
+    }else if(territoryState == TerritoryStates.WhiteTerritory){
+      print("Białe");
+      paint.color = Colors.white;
+      canvas.drawRect(Rect.fromCenter(center: Offset(size.width / 2, size.height / 2), width: size.width/2,height: size.height/2), paint);
+    }
+
   }
 
   @override

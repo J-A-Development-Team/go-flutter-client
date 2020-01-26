@@ -19,7 +19,7 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
 
   String filePath = 'files/htpg.htm';
   String selectedSize = "5x5";
-  var channel = HtmlWebSocketChannel.connect("ws://localhost:8889");
+  var channel = HtmlWebSocketChannel.connect("ws://localhost:8888");
 
   void sendGameConfig() {
     switch (selectedSize) {
