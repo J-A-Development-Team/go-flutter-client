@@ -17,10 +17,8 @@ class ConfigurationScreen extends StatefulWidget {
 class _ConfigurationScreenState extends State<ConfigurationScreen> {
   int boardSize = 0;
   List<String> values = ["5x5", "9x9", "13x13", "19x19"];
-  String filePath = 'files/htpg.htm';
   String selectedSize = "5x5";
   var channel = HtmlWebSocketChannel.connect("ws://localhost:8888");
-
   void sendGameConfig(bool gameWithBot) {
     switch (selectedSize) {
       case "5x5":
