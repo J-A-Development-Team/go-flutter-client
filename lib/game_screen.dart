@@ -134,7 +134,7 @@ class GameScreenState extends State<GameScreen> {
         showInfoDialog(data.data);
         break;
       case Info.Pass:
-        // TODO: Handle this case.
+        showInfoDialog(data.data);
         break;
       case Info.Turn:
         print("Got Turn Info");
@@ -160,7 +160,7 @@ class GameScreenState extends State<GameScreen> {
         // TODO: Handle this case.
         break;
       case Info.GameResult:
-        // TODO: Handle this case.
+        showInfoDialog(data.data);
         break;
     }
   }
