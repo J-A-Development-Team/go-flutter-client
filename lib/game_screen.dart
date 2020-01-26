@@ -89,7 +89,7 @@ class GameScreenState extends State<GameScreen> {
           size: Size(
               media / (widget.boardSize + 1), media / (widget.boardSize + 1)),
           painter: CellPainter(
-              intersection: boardState[x][y], boardSize: widget.boardSize),
+              intersection: boardState[x][y], boardSize: widget.boardSize,territoryState: territoryStates[x][y]),
         ),
       ),
     );
@@ -165,7 +165,8 @@ class GameScreenState extends State<GameScreen> {
         });
         break;
       case Info.TerritoryTable:
-        updateTerritory(data.data);
+        print(data.data);
+        updateTerritory(data);
         break;
       case Info.GameConfig:
         // TODO: Handle this case.
@@ -177,13 +178,13 @@ class GameScreenState extends State<GameScreen> {
     }
   }
   void updateTerritory(DataPackage dataPackage) {
-    print(dataPackage.data);
     for (int i = 0; widget.boardSize > i; i++) {
       for (int j = 0; widget.boardSize > j; j++) {
         setState(() {
-          territoryStates[j][i] =
+          territoryStates[i][j] =
               decodeTerritory(territoryMap, jsonDecode(dataPackage.data)[i][j]);
         });
+        print(territoryStates[i][j]);
       }
     }
   }
