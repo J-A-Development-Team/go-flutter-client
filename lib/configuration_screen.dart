@@ -69,7 +69,8 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
                   child: RaisedButton(
-                    child: Text("Play With Human"),
+                    color: Colors.white,
+                    child: Text("Play With Human",style: TextStyle(fontSize: 20),),
                     onPressed: () => {
                       sendGameConfig(false),
                       Navigator.push(
@@ -86,7 +87,8 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
                   child: RaisedButton(
-                    child: Text("Play With Bot"),
+                    color: Colors.white,
+                    child: Text("Play With Bot",style: TextStyle(fontSize: 20)),
                     onPressed: () => {
                       sendGameConfig(true),
                       Navigator.push(

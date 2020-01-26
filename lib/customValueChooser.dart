@@ -42,6 +42,7 @@ class _CustomValueChooserState extends State<CustomValueChooser> {
   @override
   void initState() {
     slider = new CarouselSlider(
+      enlargeCenterPage: true,
       onPageChanged: (int index){
         selectedValueIndex = index;
       },
@@ -52,8 +53,8 @@ class _CustomValueChooserState extends State<CustomValueChooser> {
         return Builder(
           builder: (BuildContext context) {
             return Container(
-              width: 40,
-              child: Text(i,textAlign: TextAlign.center,),
+              width: 100,
+              child: Text(i,textAlign: TextAlign.center,style: TextStyle(fontSize: 30),),
             );
           },
         );
@@ -69,15 +70,15 @@ class _CustomValueChooserState extends State<CustomValueChooser> {
       children: <Widget>[
         GestureDetector(
           onTap: _previousValue,
-          child: Icon(Icons.arrow_back_ios),
+          child: Icon(Icons.arrow_back_ios,size: 40,),
         ),
         Container(
-          constraints: BoxConstraints(minWidth: 50 ,maxWidth: 50, maxHeight: 20),
+          constraints: BoxConstraints(minWidth: 100 ,maxWidth: 100, maxHeight: 35),
           child: slider,
         ),
         GestureDetector(
           onTap: _nextValue,
-          child: Icon(Icons.arrow_forward_ios),
+          child: Icon(Icons.arrow_forward_ios,size: 40,),
         )
       ],
     );
