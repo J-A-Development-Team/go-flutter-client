@@ -18,7 +18,9 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
   int boardSize = 0;
   List<String> values = ["5x5", "9x9", "13x13", "19x19"];
   String selectedSize = "5x5";
-  var channel = HtmlWebSocketChannel.connect("ws://localhost:8888");
+  HtmlWebSocketChannel channel =
+      HtmlWebSocketChannel.connect("ws://192.168.43.194:8888");
+
   void sendGameConfig(bool gameWithBot) {
     switch (selectedSize) {
       case "5x5":
@@ -70,7 +72,10 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                   constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
                   child: RaisedButton(
                     color: Colors.white,
-                    child: Text("Play With Human",style: TextStyle(fontSize: 20),),
+                    child: Text(
+                      "Play With Human",
+                      style: TextStyle(fontSize: 20),
+                    ),
                     onPressed: () => {
                       sendGameConfig(false),
                       Navigator.push(
@@ -88,7 +93,8 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                   constraints: BoxConstraints(maxWidth: 200, minWidth: 200),
                   child: RaisedButton(
                     color: Colors.white,
-                    child: Text("Play With Bot",style: TextStyle(fontSize: 20)),
+                    child: Text("Play With Bot",
+                        style: TextStyle(fontSize: 20)),
                     onPressed: () => {
                       sendGameConfig(true),
                       Navigator.push(

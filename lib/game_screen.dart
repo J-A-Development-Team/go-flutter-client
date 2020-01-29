@@ -21,6 +21,8 @@ class GameScreen extends StatefulWidget {
 class GameScreenState extends State<GameScreen> {
   bool isYourTurn = false;
   bool playerColor = false;
+  bool displayLastStone = false;
+  Intersection lastStone;
   String turn = "";
   int points = 0;
   List<List<Intersection>> boardState = List.generate(
@@ -87,7 +89,8 @@ class GameScreenState extends State<GameScreen> {
           painter: CellPainter(
               intersection: boardState[x][y],
               boardSize: widget.boardSize,
-              territoryState: territoryStates[x][y]),
+              territoryState: territoryStates[x][y],
+              lastPlacedStone: lastStone),
         ),
       ),
     );
@@ -122,7 +125,7 @@ class GameScreenState extends State<GameScreen> {
     data = new DataPackage.fromJson(message);
     switch (data.info) {
       case Info.Stone:
-        // TODO: Handle this case.
+        lastStone = Intersection.fromJson(data.data);
         break;
       case Info.StoneTable:
         updateTable(data);
@@ -238,8 +241,13 @@ class CellPainter extends CustomPainter {
   final Intersection intersection;
   final int boardSize;
   final TerritoryStates territoryState;
+  final Intersection lastPlacedStone;
 
-  CellPainter({this.intersection, this.boardSize, this.territoryState});
+  CellPainter(
+      {this.intersection,
+      this.boardSize,
+      this.territoryState,
+      this.lastPlacedStone});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -273,15 +281,23 @@ class CellPainter extends CustomPainter {
     }
     canvas.drawLine(top, bottom, paint);
     canvas.drawLine(left, right, paint);
+    if (intersection.xCoordinate == lastPlacedStone.xCoordinate &&
+        intersection.yCoordinate == lastPlacedStone.yCoordinate&& intersection.hasStone) {
+      paint.color = Colors.red;
+      canvas.drawCircle(Offset(size.width / 2, size.height / 2),
+          (size.height / 2), paint);
+    }
     if (!intersection.isStoneBlack) {
       paint.color = Colors.white;
+    }else{
+      paint.color = Colors.black;
     }
     if (intersection.isStoneDead) {
       paint.color = paint.color.withAlpha(128);
     }
     if (intersection.hasStone) {
       canvas.drawCircle(Offset(size.width / 2, size.height / 2),
-          (size.height / 2) - (size.height * 0.01), paint);
+          (size.height / 2) - (size.height * 0.05), paint);
     }
     if (territoryState == TerritoryStates.BlackTerritory) {
       paint.color = Colors.black;
@@ -300,6 +316,7 @@ class CellPainter extends CustomPainter {
               height: size.height / 2),
           paint);
     }
+
   }
 
   @override

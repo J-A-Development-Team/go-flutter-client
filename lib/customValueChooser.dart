@@ -47,7 +47,7 @@ class _CustomValueChooserState extends State<CustomValueChooser> {
         selectedValueIndex = index;
       },
       enableInfiniteScroll: false,
-      viewportFraction: 1,
+      viewportFraction: 1.0,
       initialPage: selectedValueIndex,
       items: widget.values.map((i) {
         return Builder(
